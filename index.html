@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Escape the Zombie Room</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;height:100vh;background:#070b14;color:#ece7d8;font-family:Tahoma,'Segoe UI','Noto Naskh Arabic',sans-serif;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#wrap{position:relative;width:min(100vw,calc(100vh*1.6));aspect-ratio:16/10;background:#0b1220;overflow:hidden;font-size:clamp(11px,2.1vw,17px)}
+canvas{width:100%;height:100%;display:block}
+#scr,#qb{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7em;padding:3%;text-align:center;background:radial-gradient(circle at 50% 30%,#1b2535,#0a0f1a 70%);overflow:auto}
+#qb{display:none;background:rgba(7,11,20,.9)}
+h1{margin:0;font-size:2em;color:#e0b24a}h2{margin:.3em 0;font-size:1.35em;line-height:1.7;font-weight:600}
+.title{font-family:Impact,'Arial Black',sans-serif;letter-spacing:.12em;font-size:2.8em;color:#e0b24a;text-shadow:0 0 24px #b3363f;direction:ltr}
+.sm{color:#9aa4b5;margin:0}.bad{color:#e0636c}
+.btn{background:#1b212b;color:#e0b24a;border:1.5px solid #e0b24a;border-radius:6px;padding:.6em 1.6em;font:inherit;font-weight:700;cursor:pointer;min-width:12em;transition:background .15s,transform .15s}
+.btn:hover:not(:disabled){background:#e0b24a;color:#0b1220}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.lv{display:grid;grid-template-columns:1fr 1fr;gap:.6em}
+.card{width:min(92%,38em);background:#141b27;border:1px solid #e0b24a;border-radius:10px;padding:1.4em;display:flex;flex-direction:column;gap:.7em}
+.tag{align-self:center;background:#e0b24a;color:#0b1220;font-weight:700;padding:.15em .9em;border-radius:99px}
+.m{min-height:1.5em;color:#e0b24a}.m.ok{color:#6fd08a}.m.bad{color:#e0636c}.hint{color:#8fb7e8}
+input{font:inherit;padding:.6em;border-radius:6px;border:1px solid #3a4558;background:#0b1220;color:#fff;text-align:right}
+input:focus,.btn:focus-visible{outline:2px solid #e0b24a}
+.res{background:#141b27;border:1px solid #2a3342;border-radius:8px;padding:.8em 1.4em;text-align:right}.res p{margin:.3em 0}
+.tw{max-height:62%;overflow:auto;width:100%}table{border-collapse:collapse;width:100%;font-size:.85em}td,th{border-bottom:1px solid #2a3342;padding:.4em}th{color:#e0b24a}
+#hud{position:absolute;top:0;left:0;right:0;display:none;gap:1em;align-items:center;padding:.35em .8em;background:rgba(7,11,20,.7);font-weight:700}
+#hud span:first-child{color:#e0636c;letter-spacing:.1em}#ha{color:#e0b24a}#hud .ib{margin-right:auto;background:none;border:1px solid #556;color:#fff;border-radius:6px;font-size:1.1em;padding:.1em .6em;cursor:pointer}
+#msg{position:absolute;top:14%;left:0;right:0;text-align:center;font-weight:700;font-size:1.3em;color:#e0b24a;text-shadow:0 2px 6px #000;pointer-events:none}
+#touch{display:none}#joy,#fire{position:absolute;bottom:6%;border-radius:50%;background:rgba(224,178,74,.15);border:2px solid rgba(224,178,74,.6);touch-action:none}
+#joy{left:4%;width:24%;aspect-ratio:1}#knob{position:absolute;left:30%;top:30%;width:40%;height:40%;border-radius:50%;background:rgba(224,178,74,.6)}
+#fire{right:4%;width:20%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#e0b24a}
+
+#scr{background:radial-gradient(ellipse at 50% 0%,#26354f 0%,#0c1220 55%,#05070d 100%)}
+#scr::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 2px,transparent 2px 4px);pointer-events:none}
+.title{background:linear-gradient(180deg,#ffe9ad,#e0b24a 55%,#a97c1f);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 16px rgba(179,54,63,.85));animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{50%{filter:drop-shadow(0 0 30px rgba(220,60,70,1))}}
+.zb{font-size:3.2em;line-height:1;filter:drop-shadow(0 0 14px #5a8a4a);animation:fl 2.6s infinite}
+@keyframes fl{0%,100%{opacity:1}47%{opacity:.55}50%{opacity:1}}
+.btn{background:linear-gradient(180deg,#242d3c,#151b26);border-radius:8px;box-shadow:0 2px 0 #7a5d1c,0 8px 18px rgba(0,0,0,.45)}
+.btn:hover:not(:disabled){background:linear-gradient(180deg,#f3cf72,#cfa038);color:#0b1220;box-shadow:0 2px 0 #7a5d1c,0 0 22px rgba(224,178,74,.55);transform:translateY(-1px)}
+.lv .btn{min-width:15em;padding:.9em 1.2em}
+.card{background:linear-gradient(180deg,#19222f,#0f1520);box-shadow:0 0 0 1px rgba(224,178,74,.3),0 24px 70px rgba(0,0,0,.65);animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.94);opacity:0}}
+.tag{box-shadow:0 0 14px rgba(224,178,74,.45)}
+input{font-size:1.1em;background:#090e17;border:1.5px solid #34425a}
+input:focus{border-color:#e0b24a;box-shadow:0 0 0 3px rgba(224,178,74,.25);outline:none}
+.m.ok{text-shadow:0 0 10px rgba(111,208,138,.5)}.m.bad{text-shadow:0 0 10px rgba(224,99,108,.5)}
+#hud{background:linear-gradient(180deg,rgba(5,8,14,.9),rgba(5,8,14,0));padding:.5em 1em;text-shadow:0 1px 4px #000}
+#hh{font-size:1.4em;color:#ff4d5a!important;text-shadow:0 0 10px rgba(255,60,80,.7)}
+#ha{background:rgba(224,178,74,.12);border:1px solid rgba(224,178,74,.45);border-radius:99px;padding:.1em .9em}
+#scr::after{content:"";position:absolute;inset:-20%;background:radial-gradient(40% 30% at 20% 80%,rgba(130,30,40,.28),transparent),radial-gradient(35% 30% at 85% 65%,rgba(60,90,150,.22),transparent);animation:drift 14s ease-in-out infinite alternate;pointer-events:none}
+@keyframes drift{to{transform:translate(4%,-3%)}}
+#msg{white-space:pre-line;font-size:1.55em;line-height:1.6;animation:pop .4s ease-out}
+.lv .btn{font-size:1.1em;text-align:right}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div id="wrap">
+<canvas id="c" width="800" height="500"></canvas>
+<div id="hud"><span id="hh"></span><span id="ha"></span><span id="hl"></span><span id="he"></span><button class="ib" onclick="pause()" aria-label="إيقاف مؤقت">⏸</button></div>
+<div id="msg"></div>
+<div id="touch"><div id="joy"><div id="knob"></div></div><div id="fire">أطلق</div></div>
+<div id="scr"></div><div id="qb"></div>
+</div>
+<script>
+/* ESCAPE THE ZOMBIE ROOM - classic script, no modules, runs from file://
+   NOTE: answer checking is an APPROXIMATE hand-curated keyword/synonym evaluator (not semantic AI).
+   Each question lists answer "points"; a point = alternatives separated by |, "a+b" means both stems must appear.
+   r = points required. Add questions by calling Q(...) below. */
+const $=s=>document.querySelector(s),W=800,H=500,SV='ezr1',TOUCH=matchMedia('(pointer:coarse)').matches;
+let sv={u:1,d:[],best:0,mute:0,st:{}};
+try{Object.assign(sv,JSON.parse(localStorage.getItem(SV)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(SV,JSON.stringify(sv))}catch(e){}};
+const nz=s=>s.replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ء/g,'').replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/[^\u0621-\u064Aa-z0-9\s]/gi,' ').replace(/\s+/g,' ').trim();
+const P2=a=>a.map(s=>s.split('|').map(x=>x.split('+').map(nz)));
+const W_='من هو؟',R_='ما النتائج المترتبة على؟',E_='بم تفسر؟',M_='ما المقصود بـ؟';
+const NM={col:/كولومب|كولمب|كلومب|كلمب|كريستوف|كرستوف|كليستوف|كريستفر|كلستوف/,ves:/امريجو|اميريجو|امريغو|اميريغو|امريكو|اميركو|اميريكو|فيسبوتش|فسبوتش|فيسبوش|فسبوش/,mag:/ماجلان|ماجيلان|ماغلان|ماغيلان|ماجلن|ماجيلن|ماجلين/,cook:/كوك/,maj:/ماجد|ماجيد/};
+const QS=[],Q=(c,t,q,r,p,h,w)=>QS.push({id:QS.length,c,t,q,r:1,p:P2(p),h,w})/* r forced to 1: one correct point is enough; set r back to the argument to require more */;
+/* من هو؟ (1 point: the person; other people's names are rejected) */
+Q(W_,'المستكشفون','مستكشف إيطالي يعود له الفضل في اكتشاف جزر البهاما؟',1,[],'ك','col');
+Q(W_,'المستكشفون','مستكشف إيطالي أُطلق اسمه على القارتين الجديدتين؟',1,[],'أ','ves');
+Q(W_,'المستكشفون','مستكشف أطلق على المحيط الهادي هذا الاسم؟',1,[],'م','mag');
+Q(W_,'المستكشفون','مستكشف بريطاني أعلن تبعية الساحل الشرقي لأستراليا لبريطانيا عام 1770م؟',1,[],'ج','cook');
+Q(W_,'المستكشفون','عالم وملاح مسلم وضع قواعد دقيقة للملاحة واستفاد الأوروبيون من مؤلفاته وخرائطه؟',1,[],'أ','maj');
+/* ما النتائج (2 of 3, or 2 of 2) */
+Q(R_,'نتائج الكشوف','وصول البحار البريطاني جيمس كوك إلى الساحل الشرقي لأستراليا عام 1770م؟',2,['خرائط|خريطه','تبعي|ضم+بريطاني|اعلن+بريطاني|ملك+بريطاني','استيطان|استوطن|مستوطن|استعمار']);
+Q(R_,'نتائج الكشوف','انتشار الأمراض والأوبئة الوافدة مثل الجدري والإنفلونزا التي جلبها الأوروبيون إلى العالم الجديد؟',2,['وفاه|وفيات|موت|مات|هلك|هلاك|ابيد|اباده|قتل','مناع']);
+Q(R_,'نتائج الكشوف','الكشوف الجغرافية بالنسبة لتجارة العالم والمحيط الأطلنطي؟',2,['طريق+تجار|مركز+تجار|محور+تجار|رئيسي+تجار|ممر+تجار','ذهب|فضه']);
+Q(R_,'تجارة الرقيق','حاجة الأوروبيين الشديدة للعمالة الرخيصة في مزارع ومناجم العالم الجديد؟',1,['رقيق|عبيد|استعباد|تجاره+بشر|اتجه+رقيق|اتجاه+رقيق','نقل+افارق|نقلو+افارق|جلب+افارق|افارق+امريك|افارق+قسر|افارق+عمل|افريق+امريك|افريق+قسر','دمار|خراب|تدهور']);
+Q(R_,'نتائج الكشوف','تنافس الدول الأوروبية مثل إسبانيا وإنجلترا وفرنسا على الأراضي المكتشفة حديثًا؟',2,['مستعمر|استعمار|مستوطن','حرب|حروب|صراع|نزاع']);
+Q(R_,'العلماء المسلمون','اعتماد الأوروبيين على مؤلفات وابتكارات العلماء والرحالة المسلمين في الجغرافيا والملاحة؟',2,['عبور|عبر+محيط|وصل+هند|وصول+هند|وصلو+هند|وصل+عالم|وصول+عالم|وصلو+عالم','ملاح|خرائط|خريط|اجهز|بوصل|اسطرلاب']);
+/* بم تفسر؟ (the 2 duplicate "results" questions are intentionally only here) */
+Q(E_,'التسميات','إطلاق الجغرافيين الأوروبيين اسم «أمريكا» على القارتين الجديدتين؟',1,['امريجو|فيسبوتش|نسب|تخليد|تكريم|تقدير|جهود|ليس+اسيا|ليست+اسيا|غير+اسيا|قاره+جديد|قاره+مستقل|عالم+جديد']);
+Q(E_,'التسميات','تسمية المستكشف ماجلان المحيط الهادي بهذا الاسم؟',1,['هادي|هدو|هدا|سكون|مسالم']);
+Q(E_,'نتائج الكشوف','أهمية أول رحلة بحرية حول العالم والتي حققها رفاق ماجلان؟',1,['كروي|كره+ارض|كره+الارض|مستدير']);
+/* New questions from textbook pp.64-70. The old C4 was two separate textbook questions (p.70); now split correctly. */
+Q(E_,'تجارة الرقيق','أصبح الرقيق الأفريقي السلعة الأهم بعد اكتشاف الأمريكتين؟',1,['مزارع|مناجم|زراعه|منجم|عمل+قسر|نقل+افارق|نقلو+افارق|نقلت+افارق']);
+Q(E_,'تجارة الرقيق','استغلال القوى الأوروبية الصراعات والانقسامات الداخلية في المجتمعات الأفريقية ومنعها قيام وحدات سياسية قوية؟',1,['استغلال+بشر|استغلال+افارق|عماله+رخيصه|عمال+رخيص|رخيص|استمرار']);
+Q(E_,'دوافع الكشوف','البحث عن طرق تجارية جديدة للوصول إلى الهند وشرق آسيا دون المرور بطريق الحرير البري أو الأراضي الخاضعة للعثمانيين والمماليك؟',1,['رسوم|ضرائب|جمارك|تجنب+دفع|تفادي+دفع|عدم+دفع']);
+Q(E_,'دوافع الكشوف','سعي الدول الأوروبية إلى زيادة ثرواتها من المعادن النفيسة، خاصة الذهب والفضة؟',1,['سك|نقود|نقد|عمله']);
+Q(W_,'المستكشفون','مستكشف برتغالي انطلق في رحلته بتمويل من إسبانيا ووصل إلى مضيق في أقصى جنوب أمريكا الجنوبية عُرف باسمه؟',1,[],'م','mag');
+Q(W_,'المستكشفون','مستكشف توصل إلى أن الأراضي المكتشفة ليست جزءًا من آسيا بل عالم جديد وقارة مستقلة؟',1,[],'أ','ves');
+Q(W_,'المستكشفون','مستكشف انطلق من فكرة كروية الأرض وأقنع ملوك إسبانيا بتمويل رحلته غربًا؟',1,[],'ك','col');
+Q(W_,'المستكشفون','مستكشف تابع رحلاته في البحر الكاريبي دون أن يدرك أنه وصل إلى قارة جديدة؟',1,[],'ك','col');
+Q(R_,'نتائج الكشوف','الكشوف الجغرافية من الناحية العلمية؟',2,['تطور+جغرافيا|علم+جغرافيا','خرائط|خريطه','نبات|حيوان|انواع+جديده','دراسه+بيئ|دراسه+شعوب|فرص+علماء']);
+Q(R_,'نتائج الكشوف','الكشوف الجغرافية من الناحية الاقتصادية؟',2,['طريق+تجار|مركز+تجار|محور+تجار|رئيسي+تجار','ذهب|فضه','مواد+خام|قطن|سكر|مصدر+مواد','سوق|تصريف|ازدهار+تجار']);
+Q(R_,'نتائج الكشوف','الكشوف الجغرافية من الناحية الاجتماعية؟',2,['هجر','سلبي|ابادة|ابيد|رقيق|افارق+استغل|سكان+اصلي']);
+Q(R_,'السكان الأصليون','وصول الأوروبيين إلى الأمريكتين وأستراليا بالنسبة للسكان الأصليين؟',2,['ابادة|ابيد|اباده','وفاه|مرض|اوبئه|جدري|انفلونزا','احتل|تهجير|اراضي','تمييز|استغلال|عمل+شاق','ثقافات|عادات']);
+Q(E_,'تجارة الرقيق','كانت تجارة الرقيق عملًا قاسيًا واستثنائيًا بالنسبة للأفارقة؟',2,['دمار|خراب|تدهور','حري|حقوق|حرمان|حرمو','استغل|رخيص']);
+/* ما المقصود */
+Q(M_,'المفاهيم','ما المقصود بالكشوف الجغرافية؟',2,['رحل|القرن+15|خامس+عشر','اكتشاف|استكشاف|طرق+جديد|مجهول']);
+Q(M_,'تجارة الرقيق','ما المقصود بتجارة الرقيق؟',2,['بيع|شراء|عبيد|عبد|استعباد','عمل+اجباري|عمل+قسري|اجبار|قسر|سخره','حري|حقوق|حرمان']);
+const PRE={[W_]:'من هو ',[R_]:'ما النتائج المترتبة على ',[E_]:'بم تفسر ',[M_]:''};
+const pre=q=>PRE[q.c]+q.q;
+const hint=q=>q.w?`تلميح: الاسم يبدأ بحرف «${q.h}»`:`تلميح: تحتاج الإجابة إلى ${q.r>1?q.r+' نقاط صحيحة على الأقل':'نقطة صحيحة واحدة'}`;
+function chk(q,a){const t=nz(a);if(t.length<2||t.length>260||t.split(' ').length>45)return 0;
+ if(q.w)return NM[q.w].test(t)&&Object.keys(NM).every(k=>k==q.w||!NM[k].test(t));
+ return q.p.filter(pt=>pt.some(alt=>alt.every(s=>t.includes(s)))).length>=q.r}
+/* question scheduling: no repeats until deck is exhausted; missed ones return after 3+ other questions */
+const D={deck:[],last:-1,streak:0};
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const mis=i=>(sv.st[i]||{m:0}).m;
+if(!Array.isArray(sv.seen))sv.seen=[];
+D.deck=shuf(QS.map(q=>q.id).filter(i=>!sv.seen.includes(i)));
+/* a question never repeats until every question was asked; then a new round starts with the most-missed first */
+function pick(){if(!D.deck.length){sv.seen=[];D.deck=shuf(QS.map(q=>q.id)).sort((a,b)=>mis(a)-mis(b))}
+ const n=D.deck.length;if(n>1&&D.deck[n-1]==D.last)[D.deck[0],D.deck[n-1]]=[D.deck[n-1],D.deck[0]];
+ const id=D.deck.pop();sv.seen.push(id);D.last=id;return QS[id]}
+/* sound (WebAudio, optional) */
+let ac;function snd(k){if(sv.mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const T={shot:[[520,.08,'square',.05,120]],hit:[[180,.08,'sawtooth',.06,90]],kill:[[140,.25,'sawtooth',.07,40]],hurt:[[110,.25,'square',.08,60]],ok:[[520,.12,'sine',.08,0],[780,.2,'sine',.08,0]],bad:[[200,.3,'sawtooth',.07,100]],win:[[523,.2,'sine',.08,0],[659,.2,'sine',.08,0],[784,.4,'sine',.08,0]],lose:[[200,.5,'sawtooth',.08,60]]}[k];let t=ac.currentTime;T.forEach(([f,d,w,v,e])=>{const o=ac.createOscillator(),g=ac.createGain();o.type=w;o.frequency.setValueAtTime(f,t);if(e)o.frequency.exponentialRampToValueAtTime(e,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d);t+=d*.8})}catch(e){}}
+/* levels: hits per zombie n=2 f=1 s=4 b=10 */
+const ZT={n:{hp:2,sp:58,r:14,c:'#6f9a5b',d:1},f:{hp:1,sp:112,r:12,c:'#a3c24f',d:1},s:{hp:4,sp:40,r:19,c:'#4f7a6a',d:1},b:{hp:10,sp:52,r:32,c:'#8a2f3a',d:2}};
+const LV=[
+{n:'الفصل الدراسي',fl:['#3a2f26','#2c231c'],z:'nnnn',ob:[[250,120,70,36,'d'],[250,330,70,36,'d'],[470,120,70,36,'d'],[470,330,70,36,'d'],[360,230,70,36,'d']]},
+{n:'الممر',fl:['#2d3642','#252d38'],z:'nnnfff',ob:[[300,120,40,60,'k'],[300,320,40,60,'k'],[520,220,40,60,'k']]},
+{n:'المكتبة',fl:['#33261c','#2a1f16'],z:'nnnss',ob:[[200,110,150,34,'s'],[200,360,150,34,'s'],[450,110,150,34,'s'],[450,360,150,34,'s'],[375,230,60,40,'t']]},
+{n:'الهروب الأخير',fl:['#1b1a22','#15141b'],z:'bnns',ob:[[250,150,50,50,'c'],[500,300,50,50,'c'],[380,230,40,40,'c']]}];
+let G=null,K={},M={x:400,y:250},joy={x:0,y:0},last=0,mt;
+const alive=()=>G.z.some(z=>!z.dead);
+function blk(x,y,r){if(x<r||x>W-r||y<r+40||y>H-r)return 1;
+ for(const o of LV[G.l].ob){const nx=Math.max(o[0],Math.min(x,o[0]+o[2])),ny=Math.max(o[1],Math.min(y,o[1]+o[3]));if(Math.hypot(x-nx,y-ny)<r)return 1}
+ return !G.open&&x>W-r-12&&y>195&&y<305?1:0}
+function mv(e,dx,dy,s){let a=0;if(!blk(e.x+dx,e.y,e.r)){e.x+=dx;a=1}if(!blk(e.x,e.y+dy,e.r)){e.y+=dy;a=1}
+ if(!a&&s){const k=e.id%2?1:-1;if(!blk(e.x-dy*k,e.y+dx*k,e.r)){e.x-=dy*k;e.y+=dx*k}}}
+function near(){let b=null,bd=1e9;for(const z of G.z){if(z.dead)continue;const d=Math.hypot(z.x-G.p.x,z.y-G.p.y);if(d<bd){bd=d;b=z}}return b}
+function msg(t,ms){const m=$('#msg');m.textContent=t;clearTimeout(mt);mt=setTimeout(()=>m.textContent='',ms)}
+function start(l){D.streak=0;G={l,t:0,p:{x:60,y:270,r:12,hp:3,ammo:3,inv:0,a:0,cd:0,fl:0,ph:0,mv:0},z:[],b:[],pt:[],pen:0,qT:0,paused:0,q:null,over:0,open:0,firing:0,lock:0,flash:0,run:1};
+ [...LV[l].z].forEach((c,i,sp)=>{const T=ZT[c],z={...T,t:c,mx:T.hp,cd:0,hit:0,dead:0,dt:0,a:0,ph:Math.random()*6,agg:0,id:i};
+  do{z.x=380+Math.random()*340;z.y=70+i*(380/sp.length)+Math.random()*40}while(blk(z.x,z.y,z.r+4));G.z.push(z)});
+ $('#scr').style.display='none';$('#qb').style.display='none';$('#hud').style.display='flex';$('#touch').style.display=TOUCH?'block':'none';
+ msg(`المستوى ${l+1}: ${LV[l].n}\nاقضِ على كل الزومبي ثم اتجه إلى البوابة`,3400)}
+function blood(x,y,n){for(let k=0;k<n;k++){const a=Math.random()*6.28,v=40+Math.random()*130;G.pt.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5+Math.random()*.4})}}
+function upd(dt){const P=G.p;G.t+=dt;
+ let ix=(K.KeyD||K.ArrowRight?1:0)-(K.KeyA||K.ArrowLeft?1:0),iy=(K.KeyS||K.ArrowDown?1:0)-(K.KeyW||K.ArrowUp?1:0);
+ if(Math.hypot(joy.x,joy.y)>.15){ix=joy.x;iy=joy.y}
+ const m=Math.hypot(ix,iy);if(m>1){ix/=m;iy/=m}
+ P.mv=m>.1;mv(P,ix*175*dt,iy*175*dt);if(P.mv)P.ph+=dt*11;
+ if(TOUCH){const n=near();if(n)P.a=Math.atan2(n.y-P.y,n.x-P.x);else if(P.mv)P.a=Math.atan2(iy,ix)}else P.a=Math.atan2(M.y-P.y,M.x-P.x);
+ P.cd-=dt;P.inv-=dt;P.fl-=dt;G.flash-=dt;
+ if(G.firing&&P.cd<=0&&!G.pen)shoot();
+ if(G.pen>0){G.pen-=dt;if(G.pen<=0){G.pen=0;if(alive())openQ()}}
+ if(G.qT>0){G.qT-=dt;if(G.qT<=0&&P.ammo<=0&&!G.pen&&alive())openQ()}
+ G.b=G.b.filter(b=>{b.x+=b.vx*dt;b.y+=b.vy*dt;b.l-=dt;if(b.l<=0||blk(b.x,b.y,2))return 0;
+  for(const z of G.z){if(z.dead)continue;if(Math.hypot(z.x-b.x,z.y-b.y)<z.r+3){z.hp--;z.hit=.15;z.x+=b.vx*.02;z.y+=b.vy*.02;blood(z.x,z.y,z.hp<=0?14:5);if(z.hp<=0){z.dead=1;z.dt=.6;snd('kill')}else snd('hit');return 0}}return 1});
+ G.pt=G.pt.filter(q=>{q.x+=q.vx*dt;q.y+=q.vy*dt;q.vx*=.92;q.vy*=.92;q.l-=dt;return q.l>0});
+ for(const z of G.z){if(z.dead){z.dt-=dt;continue}
+  z.hit-=dt;z.cd-=dt;z.ph+=dt*6;const dx=P.x-z.x,dy=P.y-z.y,d=Math.hypot(dx,dy);z.a=Math.atan2(dy,dx);if(d<430)z.agg=1;
+  if(z.agg&&d>z.r+P.r)mv(z,dx/d*z.sp*dt,dy/d*z.sp*dt,1);
+  if(d<z.r+P.r+8&&z.cd<=0&&P.inv<=0){z.cd=1.1;hurt(z.d)}
+  for(const o of G.z)if(o!==z&&!o.dead){const ex=z.x-o.x,ey=z.y-o.y,e=Math.hypot(ex,ey);if(e>0&&e<z.r+o.r-4){z.x+=ex/e*.6;z.y+=ey/e*.6}}}
+ G.z=G.z.filter(z=>!z.dead||z.dt>0);
+ if(!alive()&&!G.open){G.open=1;msg('البوابة مفتوحة! اتجه إلى الخروج ▶',2800)}
+ if(G.open&&P.x>W-30&&P.y>200&&P.y<300)done()}
+function hurt(d){const P=G.p;P.hp-=d;P.inv=1.2;G.flash=.3;snd('hurt');if(P.hp<=0)lose()}
+function shoot(){const P=G.p;if(P.ammo<=0){if(!G.pen&&alive()&&!G.q)openQ();return}
+ P.ammo--;P.cd=.28;P.fl=.1;G.b.push({x:P.x+Math.cos(P.a)*18,y:P.y+Math.sin(P.a)*18,vx:Math.cos(P.a)*560,vy:Math.sin(P.a)*560,l:1.1});snd('shot');if(P.ammo<=0)G.qT=.6}
+/* questions */
+function openQ(){if(G.q||!G.run)return;G.q=pick();G.paused=1;K={};G.firing=0;const q=G.q,f=mis(q.id);
+ $('#qb').innerHTML=`<div class="card"><span class="tag">${q.c}</span><h2>${pre(q)}</h2><div class="m" id="qm">نفدت الذخيرة! أجب عن السؤال للمتابعة.</div>${f>=2?`<div class="hint">${hint(q)}</div>`:''}<input id="qi" maxlength="260" autocomplete="off" placeholder="اكتب إجابتك هنا"><button class="btn" id="qs">إرسال الإجابة</button></div>`;
+ $('#qb').style.display='flex';const i=$('#qi');setTimeout(()=>i.focus(),60);
+ $('#qs').onclick=()=>submit(i.value);i.onkeydown=e=>{if(e.key=='Enter')submit(i.value)}}
+function submit(v){const q=G.q;if(!q||G.lock)return;G.lock=1;const s=sv.st[q.id]=sv.st[q.id]||{a:0,m:0};s.a++;const ok=chk(q,v),m=$('#qm');
+ if(ok){D.streak++;G.p.ammo=3;let t='إجابة صحيحة! عادت الذخيرة إلى 3 طلقات.';
+  if(D.streak%3==0&&G.p.hp<3){G.p.hp++;t+=' ♥ صحة إضافية'}m.className='m ok';m.textContent=t;snd('ok')}
+ else{s.m++;D.streak=0;
+  m.className='m bad';m.textContent='الإجابة غير صحيحة. لن تستعيد الذخيرة، حاول مرة أخرى.'+(s.m>=2?' '+hint(q):'');snd('bad')}
+ save();setTimeout(()=>{$('#qb').style.display='none';G.q=null;G.lock=0;G.paused=0;if(!ok){G.pen=2.5;msg('سؤال جديد بعد لحظات... احذر!',2400)}},ok?1300:1900)}
+/* screens */
+const scr=h=>{const s=$('#scr');s.innerHTML=h;s.style.display='flex'};
+const hideUI=()=>{$('#hud').style.display=$('#touch').style.display=$('#qb').style.display='none';$('#msg').textContent=''};
+function resHTML(){let a=0,m=0,tp={};QS.forEach(q=>{const s=sv.st[q.id];if(s){a+=s.a;m+=s.m;if(s.m)tp[q.t]=(tp[q.t]||0)+s.m}});
+ const t=Object.entries(tp).sort((x,y)=>y[1]-x[1]).map(x=>x[0]+' ('+x[1]+')').join('، ')||'لا توجد أخطاء بعد';
+ return `<div class="res"><p>المستويات المكتملة: ${sv.d.length} / 4</p><p>دقة الإجابات: ${a?Math.round((a-m)/a*100):0}% (${a-m} صحيحة من ${a})</p><p>مواضيع تحتاج مراجعة: ${t}</p></div>`}
+function menu(){if(G)G.run=0;hideUI();scr(`<div class="zb">🧟</div><div class="title">ESCAPE THE ZOMBIE ROOM</div><p class="sm">الدراسات الاجتماعية - الصف الثالث الإعدادي - الكشوف الجغرافية</p><button class="btn" onclick="lvls()">ابدأ اللعب</button><button class="btn" onclick="help()">التعليمات</button><button class="btn" onclick="sett()">الإعدادات</button><button class="btn" onclick="resu()">النتائج</button><button class="btn" onclick="teach()">عرض المعلم</button>`)}
+function lvls(){scr(`<h1>اختر المستوى</h1><p class="sm">التقدم: ${sv.d.length} / 4</p><div class="lv">${LV.map((l,i)=>{const u=i<sv.u;return `<button class="btn" ${u?`onclick="start(${i})"`:'disabled'}>${u?['🏫','🚪','📚','☠️'][i]:'🔒'} ${i+1}. ${l.n}${sv.d.includes(i)?' ✔':''}</button>`}).join('')}</div><button class="btn" onclick="menu()">رجوع</button>`)}
+function help(){scr(`<h1>التعليمات</h1><div class="res"><p>تحرك بـ W A S D أو الأسهم، وصوّب بالماوس واضغط زر الفأرة للإطلاق (على الجوال: عصا الحركة وزر «أطلق» مع تصويب تلقائي).</p><p>لديك 3 طلقات فقط. عند نفادها يظهر سؤال: أجب إجابة صحيحة لتستعيد الذخيرة.</p><p>الإجابة الخاطئة لا تعيد الذخيرة، وتمنحك ثواني قليلة في مواجهة الزومبي قبل سؤال جديد.</p><p>اقضِ على كل الزومبي ثم اعبر البوابة. زر ESC للإيقاف المؤقت.</p></div><button class="btn" onclick="menu()">رجوع</button>`)}
+function sett(){scr(`<h1>الإعدادات</h1><button class="btn" onclick="sv.mute=!sv.mute;save();sett()">الصوت: ${sv.mute?'مكتوم':'مفعّل'}</button><button class="btn" onclick="if(confirm('مسح كل التقدم والنتائج؟')){sv={u:1,d:[],best:0,mute:sv.mute,st:{},seen:[]};save();D.deck=shuf(QS.map(q=>q.id));sett()}">مسح التقدم</button><button class="btn" onclick="menu()">رجوع</button>`)}
+function resu(){scr(`<h1>النتائج</h1>${resHTML()}<button class="btn" onclick="menu()">رجوع</button>`)}
+function teach(){const r=QS.map(q=>({q,s:sv.st[q.id]||{a:0,m:0}})).sort((x,y)=>(y.s.m/(y.s.a||1))-(x.s.m/(x.s.a||1))||y.s.m-x.s.m);
+ scr(`<h1>عرض المعلم</h1><p class="sm">الأسئلة الأكثر خطأً (البيانات محفوظة على هذا الجهاز فقط)</p><div class="tw"><table><tr><th>السؤال</th><th>المحاولات</th><th>الأخطاء</th><th>نسبة الخطأ</th></tr>${r.map(x=>`<tr><td>${x.q.c} ${x.q.q.slice(0,46)}</td><td>${x.s.a}</td><td>${x.s.m}</td><td>${x.s.a?Math.round(x.s.m/x.s.a*100)+'%':'-'}</td></tr>`).join('')}</table></div><button class="btn" onclick="menu()">رجوع</button>`)}
+function pause(){if(!G||!G.run||G.q)return;G.paused=!G.paused;K={};G.firing=0;
+ if(G.paused)scr(`<h1>إيقاف مؤقت</h1><button class="btn" onclick="pause()">متابعة</button><button class="btn" onclick="start(${G.l})">إعادة المستوى</button><button class="btn" onclick="menu()">القائمة الرئيسية</button>`);else $('#scr').style.display='none'}
+function done(){G.run=0;const l=G.l;if(!sv.d.includes(l))sv.d.push(l);sv.u=Math.max(sv.u,Math.min(4,l+2));sv.best=Math.max(sv.best,l+1);save();snd('win');hideUI();
+ scr(l==3?`<h1>مبروك! نجحت في الهروب من غرفة الزومبي.</h1>${resHTML()}<button class="btn" onclick="lvls()">إعادة اللعب</button><button class="btn" onclick="menu()">القائمة الرئيسية</button>`
+ :`<h1>أحسنت! يمكنك الآن مواصلة الهروب.</h1>${resHTML()}<button class="btn" onclick="start(${l+1})">المستوى التالي</button><button class="btn" onclick="menu()">القائمة الرئيسية</button>`)}
+function lose(){G.run=0;snd('lose');hideUI();scr(`<h1 class="bad">لقد خسرت! حاول مرة أخرى.</h1>${resHTML()}<button class="btn" onclick="start(${G.l})">إعادة المحاولة</button><button class="btn" onclick="menu()">القائمة الرئيسية</button>`)}
+/* drawing (all sprites are drawn procedurally) */
+const cx=$('#c').getContext('2d');
+function obs([x,y,w,h,t]){const C={d:['#7a5a3a','#4a3320'],k:['#566a82','#2b3646'],s:['#4a3322','#24170e'],t:['#6a4a30','#3b2818'],c:['#4a4048','#26212a']}[t];
+ cx.fillStyle=C[1];cx.fillRect(x+4,y+6,w,h);cx.fillStyle=C[0];cx.fillRect(x,y,w,h);cx.fillStyle='rgba(255,255,255,.13)';cx.fillRect(x,y,w,3);cx.strokeStyle='rgba(0,0,0,.45)';cx.strokeRect(x+.5,y+.5,w-1,h-1);
+ if(t=='s')for(let k=x+4;k<x+w-4;k+=8){cx.fillStyle=['#a33','#38a','#ca4','#3a6'][(k/8|0)%4];cx.fillRect(k,y+4,6,h-8)}
+ if(t=='d'){cx.fillStyle='#34261a';cx.fillRect(x+w/2-10,y+h+3,20,10)}
+ if(t=='k'){cx.fillStyle='#202b38';cx.fillRect(x+w/2-1,y+3,2,h-6)}}
+/* Detailed vector sprites (SVG data-URIs, top-down, facing right). To use your own PNGs: IMG.p.src='data:image/png;base64,...' */
+const IMG={};
+const mk=(k,b)=>{const i=new Image();i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'+b+'</svg>');IMG[k]=i};
+mk('p','<defs><radialGradient id="j" cx=".4" cy=".35"><stop offset="0" stop-color="#5b9be0"/><stop offset="1" stop-color="#1d4780"/></radialGradient><radialGradient id="h" cx=".4" cy=".4"><stop offset="0" stop-color="#f6dbb8"/><stop offset="1" stop-color="#c8996c"/></radialGradient></defs><rect x="6" y="25" width="15" height="14" rx="5" fill="#5a3b22" stroke="#2b1b0f" stroke-width="1.2"/><ellipse cx="30" cy="32" rx="12" ry="19" fill="url(#j)" stroke="#0e2442" stroke-width="1.5"/><path d="M33 22Q47 22 56 30M33 42Q47 41 56 34" stroke="#0e2442" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M33 22Q47 22 56 30M33 42Q47 41 56 34" stroke="#2c62a8" stroke-width="6.5" stroke-linecap="round" fill="none"/><rect x="48" y="29" width="15" height="6" rx="2" fill="#1b1b20" stroke="#000" stroke-width=".8"/><rect x="50" y="30" width="9" height="1.5" fill="#6b7280"/><circle cx="56" cy="30" r="3.2" fill="url(#h)"/><circle cx="56" cy="34" r="3.2" fill="url(#h)"/><circle cx="33" cy="32" r="9.5" fill="url(#h)" stroke="#6b4a2a" stroke-width="1"/><path d="M33 22.5A9.5 9.5 0 0 0 33 41.5Q27 32 33 22.5Z" fill="#2b1d14"/>');
+function dz(z){cx.fillStyle='rgba(0,0,0,.35)';cx.beginPath();cx.ellipse(z.x+3,z.y+z.r*.7,z.r*1.05,z.r*.6,0,0,7);cx.fill();
+ if(z.t=='b'&&!z.dead){const g=cx.createRadialGradient(z.x,z.y,z.r*.5,z.x,z.y,z.r*2.2);g.addColorStop(0,'rgba(255,60,60,.35)');g.addColorStop(1,'rgba(255,60,60,0)');cx.fillStyle=g;cx.fillRect(z.x-z.r*2.2,z.y-z.r*2.2,z.r*4.4,z.r*4.4)}
+ const s=z.r/14,k=z.dead?Math.max(0,z.dt/.6):1;cx.save();cx.translate(z.x,z.y);cx.globalAlpha=k;cx.scale(s*(.6+.4*k),s*(.6+.4*k));cx.rotate(z.a+(z.dead?(1-k)*2:0));
+ const sw=Math.sin(z.ph)*4;cx.fillStyle=z.hit>0?'#fff':z.c;cx.fillRect(6,-12+sw,13,5);cx.fillRect(6,7-sw,13,5);
+ cx.beginPath();cx.arc(0,0,14,0,7);cx.fill();cx.strokeStyle='rgba(0,0,0,.4)';cx.lineWidth=2;cx.stroke();
+ cx.fillStyle='rgba(0,0,0,.28)';cx.fillRect(-8,-9,9,8);cx.fillStyle='rgba(120,20,30,.75)';cx.fillRect(2,5,6,3);cx.fillStyle=z.t=='b'?'#ffcf5a':'#ff3b3b';cx.shadowColor='#f00';cx.shadowBlur=6;cx.fillRect(7,-6,3,3);cx.fillRect(7,3,3,3);cx.shadowBlur=0;
+ if(z.t=='b'){cx.fillStyle='#ffcf5a';for(let k=-2;k<=2;k++){cx.beginPath();cx.moveTo(-6,k*5);cx.lineTo(-15,k*5-3);cx.lineTo(-15,k*5+3);cx.fill()}}cx.restore();
+ if(!z.dead&&z.mx>1){cx.fillStyle='rgba(0,0,0,.6)';cx.fillRect(z.x-z.r,z.y-z.r-10,z.r*2,4);cx.fillStyle='#e0553f';cx.fillRect(z.x-z.r,z.y-z.r-10,z.r*2*z.hp/z.mx,4)}}
+function dp(){const P=G.p;cx.fillStyle='rgba(0,0,0,.35)';cx.beginPath();cx.ellipse(P.x+3,P.y+9,13,8,0,0,7);cx.fill();if(P.inv>0&&(G.t*20|0)%2)return;
+ cx.save();cx.translate(P.x,P.y);cx.rotate(P.a+(P.mv?Math.sin(P.ph)*.05:0));
+ if(P.fl>0){cx.fillStyle='#fff3b0';cx.shadowColor='#ffb020';cx.shadowBlur=18;cx.beginPath();cx.arc(26,0,9,0,7);cx.fill();cx.shadowBlur=0}
+ const d=P.r*3.4;if(IMG.p.complete)cx.drawImage(IMG.p,-d/2,-d/2,d,d);cx.restore()}
+function drw(){const P=G.p,l=LV[G.l],i=G.l;cx.save();if(G.flash>0)cx.translate((Math.random()-.5)*24*G.flash,(Math.random()-.5)*24*G.flash);cx.fillStyle=l.fl[0];cx.fillRect(0,0,W,H);cx.fillStyle=l.fl[1];
+ for(let x=0;x<W;x+=50)for(let y=50;y<H;y+=50)if((x+y)/50%2==0)cx.fillRect(x,y,50,50);
+ cx.fillStyle=i==3?'#1a0f14':'#141a26';cx.fillRect(0,0,W,40);
+ if(i==0){cx.fillStyle='#1d3d33';cx.fillRect(260,6,280,28);cx.strokeStyle='#caa24a';cx.strokeRect(260,6,280,28);cx.fillStyle='#e8e6d8';cx.fillRect(280,16,90,2);cx.fillRect(280,24,150,2)}
+ if(i==1)for(let x=20;x<W;x+=60){cx.fillStyle='#4a6a8a';cx.fillRect(x,6,40,32);cx.fillStyle='#2a3a4c';cx.fillRect(x+18,10,3,24)}
+ if(i==2)for(let x=10;x<W-40;x+=34){cx.fillStyle=['#8a3a3a','#3a5a8a','#c9a24a','#4a7a5a'][(x/34|0)%4];cx.fillRect(x,6,26,32)}
+ if(i==3){cx.fillStyle=`rgba(180,40,50,${.08+.05*Math.sin(G.t*3)})`;cx.fillRect(0,0,W,H)}
+ for(let k=0;k<9;k++){const x=(k*137+i*61)%740+30,y=(k*89+i*37)%380+70;cx.fillStyle='rgba(110,15,25,.22)';cx.beginPath();cx.ellipse(x,y,14+k%3*6,7+k%2*4,k,0,7);cx.fill()}
+ l.ob.forEach(obs);
+ cx.globalAlpha=G.open?.6+.3*Math.sin(G.t*5):1;if(G.open){cx.shadowColor='#e0b24a';cx.shadowBlur=26}cx.fillStyle=G.open?'#e0b24a':'#6a2a30';cx.fillRect(W-22,200,22,100);cx.shadowBlur=0;cx.globalAlpha=1;
+ if(!G.open){cx.fillStyle='#2a1014';for(let y=206;y<300;y+=14)cx.fillRect(W-22,y,22,3)}else{cx.fillStyle='#e0b24a';cx.font='bold 22px sans-serif';cx.fillText('▶',W-50,258)}
+ for(const q of G.pt){cx.globalAlpha=Math.min(1,q.l*2);cx.fillStyle='#9b1c26';cx.fillRect(q.x-2,q.y-2,4,4)}cx.globalAlpha=1;G.z.forEach(dz);dp();
+ for(const b of G.b){cx.strokeStyle='rgba(255,211,90,.5)';cx.lineWidth=2;cx.beginPath();cx.moveTo(b.x,b.y);cx.lineTo(b.x-b.vx*.02,b.y-b.vy*.02);cx.stroke();cx.fillStyle='#fff3b0';cx.shadowColor='#ffb020';cx.shadowBlur=10;cx.beginPath();cx.arc(b.x,b.y,3.2,0,7);cx.fill();cx.shadowBlur=0}
+ if(i==3){const g=cx.createRadialGradient(P.x,P.y,70,P.x,P.y,320);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.9)');cx.fillStyle=g;cx.fillRect(0,0,W,H)}else{const g=cx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.7);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');cx.fillStyle=g;cx.fillRect(0,0,W,H)}
+ if(G.flash>0){cx.fillStyle=`rgba(200,20,30,${G.flash})`;cx.fillRect(0,0,W,H)}cx.restore();
+ $('#hh').textContent='♥'.repeat(Math.max(0,P.hp))+'♡'.repeat(Math.max(0,3-P.hp));
+ $('#ha').textContent='الذخيرة: '+'●'.repeat(P.ammo)+'○'.repeat(3-P.ammo);
+ $('#hl').textContent=`المستوى ${i+1}: ${l.n}`;$('#he').textContent='الزومبي المتبقي: '+G.z.filter(z=>!z.dead).length}
+function loop(n){const dt=Math.min(.05,(n-last)/1e3);last=n;if(G&&G.run){if(!G.paused)upd(dt);if(G.run)drw()}requestAnimationFrame(loop)}
+/* input */
+addEventListener('keydown',e=>{if(e.code=='Escape'){pause();return}if(!G||!G.run||G.paused)return;K[e.code]=1;if(e.code.startsWith('Arrow'))e.preventDefault()});
+addEventListener('keyup',e=>{K[e.code]=0});
+const cv=$('#c');
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();M.x=(e.clientX-r.left)*W/r.width;M.y=(e.clientY-r.top)*H/r.height});
+cv.addEventListener('mousedown',e=>{if(G&&e.button==0)G.firing=1});addEventListener('mouseup',()=>{if(G)G.firing=0});
+const jb=$('#joy'),jk=$('#knob');
+function jm(t){const r=jb.getBoundingClientRect();let dx=(t.clientX-r.left-r.width/2)/(r.width/2),dy=(t.clientY-r.top-r.height/2)/(r.height/2);const m=Math.hypot(dx,dy);if(m>1){dx/=m;dy/=m}joy.x=dx;joy.y=dy;jk.style.transform=`translate(${dx*40}%,${dy*40}%)`}
+['touchstart','touchmove'].forEach(ev=>jb.addEventListener(ev,e=>{e.preventDefault();jm(e.touches[0])},{passive:false}));
+jb.addEventListener('touchend',()=>{joy.x=joy.y=0;jk.style.transform=''});
+const fb=$('#fire');fb.addEventListener('touchstart',e=>{e.preventDefault();if(G)G.firing=1},{passive:false});fb.addEventListener('touchend',()=>{if(G)G.firing=0});
+menu();requestAnimationFrame(loop);
+</script></body></html>
